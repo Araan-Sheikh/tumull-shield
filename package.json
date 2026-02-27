@@ -1,0 +1,101 @@
+{
+  "name": "@tumull/shield",
+  "version": "1.0.0",
+  "description": "Drop-in API rate limiting & DDoS protection for Node.js/Next.js",
+  "license": "MIT",
+  "author": "TUMULL I.N.C.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Araan-Sheikh/tumull-shield.git"
+  },
+  "homepage": "https://github.com/Araan-Sheikh/tumull-shield#readme",
+  "keywords": [
+    "rate-limit",
+    "rate-limiter",
+    "ddos",
+    "protection",
+    "middleware",
+    "next.js",
+    "express",
+    "api",
+    "security",
+    "brute-force",
+    "bot-detection",
+    "edge"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./stores/redis": {
+      "import": {
+        "types": "./dist/stores/redis.d.ts",
+        "default": "./dist/stores/redis.js"
+      },
+      "require": {
+        "types": "./dist/stores/redis.d.cts",
+        "default": "./dist/stores/redis.cjs"
+      }
+    },
+    "./stores/upstash": {
+      "import": {
+        "types": "./dist/stores/upstash.d.ts",
+        "default": "./dist/stores/upstash.js"
+      },
+      "require": {
+        "types": "./dist/stores/upstash.d.cts",
+        "default": "./dist/stores/upstash.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "format": "prettier --write .",
+    "benchmark": "tsx benchmarks/throughput.ts",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "prettier": "^3.4.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "peerDependencies": {
+    "ioredis": ">=5.0.0",
+    "@upstash/redis": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ioredis": {
+      "optional": true
+    },
+    "@upstash/redis": {
+      "optional": true
+    }
+  }
+}
