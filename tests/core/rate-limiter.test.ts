@@ -37,8 +37,12 @@ describe('resolveConfig', () => {
 describe('checkLimit', () => {
   let store: MemoryStore
 
-  beforeEach(() => { store = new MemoryStore() })
-  afterEach(async () => { await store.close() })
+  beforeEach(() => {
+    store = new MemoryStore()
+  })
+  afterEach(async () => {
+    await store.close()
+  })
 
   it('allows within limit', async () => {
     const res = await checkLimit('key', 5, 60_000, 'sliding-window', store)
@@ -66,8 +70,12 @@ describe('checkLimit', () => {
 describe('processRequest', () => {
   let store: MemoryStore
 
-  beforeEach(() => { store = new MemoryStore() })
-  afterEach(async () => { await store.close() })
+  beforeEach(() => {
+    store = new MemoryStore()
+  })
+  afterEach(async () => {
+    await store.close()
+  })
 
   it('lets through normal requests', async () => {
     const config = resolveConfig({ limit: 10, store })

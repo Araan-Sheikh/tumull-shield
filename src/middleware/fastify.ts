@@ -1,9 +1,4 @@
-import type {
-  ShieldConfig,
-  FastifyInstance,
-  FastifyRequest,
-  FastifyReply,
-} from '../core/types.js'
+import type { ShieldConfig, FastifyInstance, FastifyRequest, FastifyReply } from '../core/types.js'
 import { resolveConfig, checkLimit } from '../core/rate-limiter.js'
 import { extractIPFromHeaders, ipMatches } from '../utils/ip.js'
 import { extractPathname, findMatchingRoute } from '../utils/matcher.js'
@@ -22,7 +17,9 @@ export function createFastifyPlugin(
 
     fastify.addHook('onRequest', (request, reply, hookDone) => {
       handleFastifyRequest(request, reply, config)
-        .then((blocked) => { if (!blocked) hookDone() })
+        .then((blocked) => {
+          if (!blocked) hookDone()
+        })
         .catch((err) => hookDone(err instanceof Error ? err : new Error(String(err))))
     })
 

@@ -77,38 +77,40 @@ import { shieldNode } from '@tumull/shield'
 
 const limiter = shieldNode({ limit: 100, window: '1m' })
 
-http.createServer(async (req, res) => {
-  if (await limiter(req, res)) return // blocked
-  res.writeHead(200)
-  res.end('ok')
-}).listen(3000)
+http
+  .createServer(async (req, res) => {
+    if (await limiter(req, res)) return // blocked
+    res.writeHead(200)
+    res.end('ok')
+  })
+  .listen(3000)
 ```
 
 ## Config
 
 ```ts
 shield({
-  limit: 100,                    // requests per window
-  window: '1m',                  // "30s", "1m", "5m", "1h", "1d"
-  block: '15m',                  // how long to block after exceeding limit
-  algorithm: 'sliding-window',   // or 'fixed-window', 'token-bucket'
+  limit: 100, // requests per window
+  window: '1m', // "30s", "1m", "5m", "1h", "1d"
+  block: '15m', // how long to block after exceeding limit
+  algorithm: 'sliding-window', // or 'fixed-window', 'token-bucket'
 
   // different limits for different routes
   routes: {
     '/api/auth/login': { limit: 5, window: '5m', block: '30m' },
-    '/api/public/*':   { limit: 500, window: '1m' },
-    '/api/webhook/*':  { skip: true },
+    '/api/public/*': { limit: 500, window: '1m' },
+    '/api/webhook/*': { skip: true },
   },
 
   // custom key (default: client IP)
   key: (req) => req.headers.get('x-api-key') ?? extractIP(req),
 
-  store: 'memory',     // default. also supports Redis, Upstash
+  store: 'memory', // default. also supports Redis, Upstash
   botDetection: true,
   blockBots: ['scrapy', 'curl'],
   allowlist: ['127.0.0.1'],
   blocklist: [],
-  headers: true,       // X-RateLimit-* headers
+  headers: true, // X-RateLimit-* headers
 
   onLimit: (req, retryAfter) =>
     new Response(JSON.stringify({ error: 'Slow down' }), { status: 429 }),
@@ -152,11 +154,11 @@ More details → [docs/stores.md](./docs/stores.md)
 
 ## Algorithms
 
-| Algorithm | What it does | Good for |
-|---|---|---|
+| Algorithm        | What it does                                  | Good for            |
+| ---------------- | --------------------------------------------- | ------------------- |
 | `sliding-window` | Weighted average of current + previous window | Most apps (default) |
-| `fixed-window` | Simple counter, resets on interval | High throughput |
-| `token-bucket` | Tokens refill at constant rate | Bursty traffic |
+| `fixed-window`   | Simple counter, resets on interval            | High throughput     |
+| `token-bucket`   | Tokens refill at constant rate                | Bursty traffic      |
 
 More details → [docs/algorithms.md](./docs/algorithms.md)
 
@@ -174,16 +176,16 @@ When blocked → `429 Too Many Requests` with `Retry-After` header.
 
 ## How it compares
 
-| | Shield | express-rate-limit | @upstash/ratelimit | Arcjet |
-|---|---|---|---|---|
-| Next.js middleware | ✅ | ❌ | ✅ | ✅ |
-| Edge runtime | ✅ | ❌ | ✅ | ✅ |
-| Zero deps | ✅ | ✅ | ❌ | ❌ |
-| Sliding window | ✅ | ❌ | ✅ | ✅ |
-| Bot detection | ✅ | ❌ | ❌ | ✅ |
-| Brute force | ✅ | ❌ | ❌ | ✅ |
-| Per-route config | ✅ | manual | ❌ | ✅ |
-| Free | ✅ | ✅ | freemium | freemium |
+|                    | Shield | express-rate-limit | @upstash/ratelimit | Arcjet   |
+| ------------------ | ------ | ------------------ | ------------------ | -------- |
+| Next.js middleware | ✅     | ❌                 | ✅                 | ✅       |
+| Edge runtime       | ✅     | ❌                 | ✅                 | ✅       |
+| Zero deps          | ✅     | ✅                 | ❌                 | ❌       |
+| Sliding window     | ✅     | ❌                 | ✅                 | ✅       |
+| Bot detection      | ✅     | ❌                 | ❌                 | ✅       |
+| Brute force        | ✅     | ❌                 | ❌                 | ✅       |
+| Per-route config   | ✅     | manual             | ❌                 | ✅       |
+| Free               | ✅     | ✅                 | freemium           | freemium |
 
 ## Docs
 

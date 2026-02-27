@@ -5,8 +5,12 @@ import { MemoryStore } from '../../src/stores/memory'
 describe('sliding window', () => {
   let store: MemoryStore
 
-  beforeEach(() => { store = new MemoryStore({ cleanupInterval: 60_000 }) })
-  afterEach(async () => { await store.close() })
+  beforeEach(() => {
+    store = new MemoryStore({ cleanupInterval: 60_000 })
+  })
+  afterEach(async () => {
+    await store.close()
+  })
 
   it('allows requests within limit', async () => {
     for (let i = 0; i < 5; i++) {

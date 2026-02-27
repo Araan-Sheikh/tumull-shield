@@ -81,7 +81,10 @@ async function handleRequest(
   const matched = findMatchingRoute(pathname, config.routes)
   if (matched) {
     const rc = config.routes[matched]
-    if (rc.skip) { next(); return }
+    if (rc.skip) {
+      next()
+      return
+    }
     if (rc.limit !== undefined) limit = rc.limit
     if (rc.window) windowMs = parseWindow(rc.window)
     if (rc.block) blockMs = parseWindow(rc.block)

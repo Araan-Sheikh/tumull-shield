@@ -20,10 +20,7 @@ export function matchRoute(path: string, pattern: string): boolean {
 }
 
 // find the most specific matching route config
-export function findMatchingRoute(
-  path: string,
-  routes: Record<string, unknown>,
-): string | null {
+export function findMatchingRoute(path: string, routes: Record<string, unknown>): string | null {
   let best: string | null = null
   let bestScore = -1
 

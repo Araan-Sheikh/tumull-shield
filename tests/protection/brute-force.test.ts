@@ -19,7 +19,7 @@ describe('BruteForceDetector', () => {
     expect(detector.isFailureStatus(500)).toBe(false)
   })
 
-  it('doesn\'t block on first failure', () => {
+  it("doesn't block on first failure", () => {
     expect(detector.recordFailure('k').shouldBlock).toBe(false)
   })
 

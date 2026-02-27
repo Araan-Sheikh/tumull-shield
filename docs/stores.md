@@ -67,24 +67,42 @@ Implement the `Store` interface and pass it in:
 import type { Store } from '@tumull/shield'
 
 class MyStore implements Store {
-  async increment(key: string, windowMs: number) { /* return { count, reset } */ }
-  async getSlidingWindow(key: string, windowMs: number) { /* ... */ }
-  async incrementSlidingWindow(key: string, windowMs: number) { /* ... */ }
-  async isBlocked(key: string) { /* return boolean */ }
-  async block(key: string, durationMs: number) { /* ... */ }
-  async reset(key: string) { /* ... */ }
-  async getTokenBucket(key: string) { /* return { tokens, lastRefill } | null */ }
-  async setTokenBucket(key: string, state: TokenBucketState, windowMs: number) { /* ... */ }
-  async close() { /* cleanup */ }
+  async increment(key: string, windowMs: number) {
+    /* return { count, reset } */
+  }
+  async getSlidingWindow(key: string, windowMs: number) {
+    /* ... */
+  }
+  async incrementSlidingWindow(key: string, windowMs: number) {
+    /* ... */
+  }
+  async isBlocked(key: string) {
+    /* return boolean */
+  }
+  async block(key: string, durationMs: number) {
+    /* ... */
+  }
+  async reset(key: string) {
+    /* ... */
+  }
+  async getTokenBucket(key: string) {
+    /* return { tokens, lastRefill } | null */
+  }
+  async setTokenBucket(key: string, state: TokenBucketState, windowMs: number) {
+    /* ... */
+  }
+  async close() {
+    /* cleanup */
+  }
 }
 ```
 
 ## Which one?
 
-| Situation | Store |
-|---|---|
-| Dev / single server | Memory |
-| Multiple instances | Redis |
+| Situation           | Store            |
+| ------------------- | ---------------- |
+| Dev / single server | Memory           |
+| Multiple instances  | Redis            |
 | Serverless (Lambda) | Redis or Upstash |
-| Edge (Vercel Edge) | Upstash |
-| Cloudflare Workers | Upstash |
+| Edge (Vercel Edge)  | Upstash          |
+| Cloudflare Workers  | Upstash          |

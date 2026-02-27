@@ -4,8 +4,12 @@ import { MemoryStore } from '../../src/stores/memory'
 describe('MemoryStore', () => {
   let store: MemoryStore
 
-  beforeEach(() => { store = new MemoryStore({ cleanupInterval: 60_000 }) })
-  afterEach(async () => { await store.close() })
+  beforeEach(() => {
+    store = new MemoryStore({ cleanupInterval: 60_000 })
+  })
+  afterEach(async () => {
+    await store.close()
+  })
 
   describe('fixed window (increment)', () => {
     it('starts at 1', async () => {

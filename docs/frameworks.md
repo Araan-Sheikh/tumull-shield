@@ -87,9 +87,11 @@ import { shieldNode } from '@tumull/shield'
 
 const limiter = shieldNode({ limit: 100, window: '1m' })
 
-http.createServer(async (req, res) => {
-  if (await limiter(req, res)) return
-  res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.end(JSON.stringify({ ok: true }))
-}).listen(3000)
+http
+  .createServer(async (req, res) => {
+    if (await limiter(req, res)) return
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ ok: true }))
+  })
+  .listen(3000)
 ```

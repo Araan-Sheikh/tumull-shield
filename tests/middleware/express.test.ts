@@ -23,17 +23,35 @@ function mockReq(overrides: Partial<ExpressRequest> = {}): ExpressRequest {
   }
 }
 
-function mockRes(): ExpressResponse & { statusCode: number; body: unknown; headers: Record<string, string> } {
+function mockRes(): ExpressResponse & {
+  statusCode: number
+  body: unknown
+  headers: Record<string, string>
+} {
   const r: any = {
     statusCode: 200,
     body: null,
     headers: {} as Record<string, string>,
     headersSent: false,
-    status(code: number) { r.statusCode = code; return r },
-    set(field: string, value: string) { r.headers[field] = value; return r },
-    setHeader(name: string, value: string | number) { r.headers[name] = String(value); return r },
-    json(body: unknown) { r.body = body; r.headersSent = true },
-    end() { r.headersSent = true },
+    status(code: number) {
+      r.statusCode = code
+      return r
+    },
+    set(field: string, value: string) {
+      r.headers[field] = value
+      return r
+    },
+    setHeader(name: string, value: string | number) {
+      r.headers[name] = String(value)
+      return r
+    },
+    json(body: unknown) {
+      r.body = body
+      r.headersSent = true
+    },
+    end() {
+      r.headersSent = true
+    },
   }
   return r
 }
@@ -41,15 +59,22 @@ function mockRes(): ExpressResponse & { statusCode: number; body: unknown; heade
 describe('express middleware', () => {
   let store: MemoryStore
 
-  beforeEach(() => { store = new MemoryStore() })
-  afterEach(async () => { await store.close() })
+  beforeEach(() => {
+    store = new MemoryStore()
+  })
+  afterEach(async () => {
+    await store.close()
+  })
 
   it('calls next() normally', async () => {
     const mw = createExpressMiddleware({ limit: 10, window: '1m', store })
     const next = vi.fn()
 
     await new Promise<void>((resolve) => {
-      mw(mockReq(), mockRes(), (...args: unknown[]) => { next(...args); resolve() })
+      mw(mockReq(), mockRes(), (...args: unknown[]) => {
+        next(...args)
+        resolve()
+      })
     })
 
     expect(next).toHaveBeenCalled()
@@ -89,7 +114,10 @@ describe('express middleware', () => {
 
   it('blocks blocklisted IPs', async () => {
     const mw = createExpressMiddleware({
-      limit: 100, window: '1m', store, blocklist: ['127.0.0.1'],
+      limit: 100,
+      window: '1m',
+      store,
+      blocklist: ['127.0.0.1'],
     })
     const res = mockRes()
     const next = vi.fn()

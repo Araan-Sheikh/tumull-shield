@@ -14,10 +14,7 @@ export interface BotDetectionConfig {
 }
 
 // check if a request looks like it's from a bot
-export function detectBot(
-  request: Request,
-  config: BotDetectionConfig = {},
-): BotDetectionResult {
+export function detectBot(request: Request, config: BotDetectionConfig = {}): BotDetectionResult {
   const ua = request.headers.get('user-agent') ?? ''
   const flagEmptyUA = config.flagEmptyUA ?? true
   const checkHeaders = config.checkHeaders ?? true

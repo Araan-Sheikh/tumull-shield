@@ -37,10 +37,10 @@ shield({ algorithm: 'token-bucket', limit: 100, window: '1m' })
 
 ## Quick comparison
 
-| | Sliding Window | Fixed Window | Token Bucket |
-|---|---|---|---|
-| Accuracy | best | ok | good |
-| Complexity | medium | simple | more complex |
-| Memory | 2 windows | 1 counter | bucket state |
-| Bursts | smooth | 2x at boundary | controlled |
-| Use case | most APIs | high throughput | bursty traffic |
+|            | Sliding Window | Fixed Window    | Token Bucket   |
+| ---------- | -------------- | --------------- | -------------- |
+| Accuracy   | best           | ok              | good           |
+| Complexity | medium         | simple          | more complex   |
+| Memory     | 2 windows      | 1 counter       | bucket state   |
+| Bursts     | smooth         | 2x at boundary  | controlled     |
+| Use case   | most APIs      | high throughput | bursty traffic |

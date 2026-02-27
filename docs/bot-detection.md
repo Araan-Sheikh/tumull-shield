@@ -7,7 +7,7 @@ Shield can spot and block automated traffic by looking at User-Agent strings and
 ```ts
 shield({
   botDetection: true,
-  blockBots: ['scrapy', 'my-bad-scraper'],  // extra patterns to block
+  blockBots: ['scrapy', 'my-bad-scraper'], // extra patterns to block
 })
 ```
 
@@ -16,6 +16,7 @@ shield({
 **Known bot user-agents:** scrapy, crawler, spider, curl, wget, httpie, python-requests, headlesschrome, phantomjs, ahrefsbot, semrushbot, dotbot.
 
 **Suspicious signals:**
+
 - No User-Agent header at all
 - Missing standard browser headers (Accept, Accept-Language, Accept-Encoding)
 
@@ -38,14 +39,16 @@ if (result.isBot) {
 }
 
 // or just a quick check
-if (isKnownBot(userAgentString)) { /* block */ }
+if (isKnownBot(userAgentString)) {
+  /* block */
+}
 ```
 
 ## Confidence scores
 
-| Score | What it means |
-|-------|--------------|
-| 0.9 | Known bot UA match |
-| 0.7 | Empty/missing UA |
-| 0.6 | Missing all expected browser headers |
-| 0.0 | Looks fine |
+| Score | What it means                        |
+| ----- | ------------------------------------ |
+| 0.9   | Known bot UA match                   |
+| 0.7   | Empty/missing UA                     |
+| 0.6   | Missing all expected browser headers |
+| 0.0   | Looks fine                           |

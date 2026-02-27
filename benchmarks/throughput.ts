@@ -64,9 +64,7 @@ async function benchmark() {
     const elapsed = performance.now() - start
     const rps = Math.floor(processIterations / (elapsed / 1000))
 
-    console.log(
-      `    ${path.padEnd(20)} ${rps.toLocaleString().padStart(10)} req/s`,
-    )
+    console.log(`    ${path.padEnd(20)} ${rps.toLocaleString().padStart(10)} req/s`)
   }
 
   await store.close()

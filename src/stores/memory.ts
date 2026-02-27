@@ -231,10 +231,7 @@ export class MemoryStore implements Store {
   // handy for tests
   get size(): number {
     return (
-      this.fixedWindows.size +
-      this.slidingWindows.size +
-      this.blocks.size +
-      this.tokenBuckets.size
+      this.fixedWindows.size + this.slidingWindows.size + this.blocks.size + this.tokenBuckets.size
     )
   }
 }

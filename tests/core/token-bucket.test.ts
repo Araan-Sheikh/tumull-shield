@@ -5,8 +5,12 @@ import { MemoryStore } from '../../src/stores/memory'
 describe('token bucket', () => {
   let store: MemoryStore
 
-  beforeEach(() => { store = new MemoryStore({ cleanupInterval: 60_000 }) })
-  afterEach(async () => { await store.close() })
+  beforeEach(() => {
+    store = new MemoryStore({ cleanupInterval: 60_000 })
+  })
+  afterEach(async () => {
+    await store.close()
+  })
 
   it('allows first request', async () => {
     const res = await tokenBucketCheck('k', 10, 60_000, store)

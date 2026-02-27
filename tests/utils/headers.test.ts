@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { buildRateLimitHeaders, createRateLimitResponse, createBlockedResponse } from '../../src/utils/headers'
+import {
+  buildRateLimitHeaders,
+  createRateLimitResponse,
+  createBlockedResponse,
+} from '../../src/utils/headers'
 
 describe('buildRateLimitHeaders', () => {
   it('includes all the standard headers', () => {

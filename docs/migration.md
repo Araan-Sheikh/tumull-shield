@@ -3,12 +3,16 @@
 ## From express-rate-limit
 
 Before:
+
 ```ts
 import rateLimit from 'express-rate-limit'
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false }))
+app.use(
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false }),
+)
 ```
 
 After:
+
 ```ts
 import { shieldExpress } from '@tumull/shield'
 app.use(shieldExpress({ limit: 100, window: '15m' }))
@@ -21,6 +25,7 @@ Main differences: human-readable time strings instead of milliseconds, sliding w
 ## From @upstash/ratelimit
 
 Before:
+
 ```ts
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
@@ -33,6 +38,7 @@ const { success } = await ratelimit.limit(identifier)
 ```
 
 After:
+
 ```ts
 import { shield } from '@tumull/shield'
 import { UpstashStore } from '@tumull/shield/stores/upstash'
@@ -54,6 +60,7 @@ Main differences: works without Upstash (memory store is free), drop-in middlewa
 ## From rate-limiter-flexible
 
 Before:
+
 ```ts
 import { RateLimiterMemory } from 'rate-limiter-flexible'
 
@@ -70,6 +77,7 @@ app.use(async (req, res, next) => {
 ```
 
 After:
+
 ```ts
 import { shieldExpress } from '@tumull/shield'
 app.use(shieldExpress({ limit: 10, window: '1s' }))

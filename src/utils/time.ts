@@ -36,9 +36,7 @@ export function parseWindow(window: string | number): number {
 
   const match = trimmed.match(TIME_RE)
   if (!match) {
-    throw new Error(
-      `[shield] Invalid time format: "${window}". Use "30s", "1m", "5m", "1h", "1d"`,
-    )
+    throw new Error(`[shield] Invalid time format: "${window}". Use "30s", "1m", "5m", "1h", "1d"`)
   }
 
   const val = parseFloat(match[1])

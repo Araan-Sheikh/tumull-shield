@@ -52,10 +52,10 @@ detector.recordSuccess(clientIP)
 
 ## Progressive delays
 
-| Failure # | Delay |
-|-----------|-------|
-| 1 | none |
-| 2 | 1s |
-| 3 | 2s |
-| 4 | 4s |
-| 5 | blocked |
+| Failure # | Delay   |
+| --------- | ------- |
+| 1         | none    |
+| 2         | 1s      |
+| 3         | 2s      |
+| 4         | 4s      |
+| 5         | blocked |

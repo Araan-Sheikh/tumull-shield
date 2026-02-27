@@ -50,7 +50,13 @@ async function benchmark() {
     await checkLimit('reset-key', resetLimit, resetWindowMs, 'fixed-window', store)
   }
 
-  const beforeReset = await checkLimit('reset-key', resetLimit, resetWindowMs, 'fixed-window', store)
+  const beforeReset = await checkLimit(
+    'reset-key',
+    resetLimit,
+    resetWindowMs,
+    'fixed-window',
+    store,
+  )
   console.log(`    Before reset: blocked = ${!beforeReset.allowed} (expected: true)`)
 
   // Wait for window to reset

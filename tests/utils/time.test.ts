@@ -65,11 +65,23 @@ describe('parseWindow', () => {
 })
 
 describe('formatMs', () => {
-  it('formats sub-second', () => { expect(formatMs(500)).toBe('500ms') })
-  it('formats seconds', () => { expect(formatMs(5_000)).toBe('5s'); expect(formatMs(30_000)).toBe('30s') })
-  it('formats minutes', () => { expect(formatMs(60_000)).toBe('1m'); expect(formatMs(300_000)).toBe('5m') })
-  it('formats hours', () => { expect(formatMs(3_600_000)).toBe('1h') })
-  it('formats days', () => { expect(formatMs(86_400_000)).toBe('1d') })
+  it('formats sub-second', () => {
+    expect(formatMs(500)).toBe('500ms')
+  })
+  it('formats seconds', () => {
+    expect(formatMs(5_000)).toBe('5s')
+    expect(formatMs(30_000)).toBe('30s')
+  })
+  it('formats minutes', () => {
+    expect(formatMs(60_000)).toBe('1m')
+    expect(formatMs(300_000)).toBe('5m')
+  })
+  it('formats hours', () => {
+    expect(formatMs(3_600_000)).toBe('1h')
+  })
+  it('formats days', () => {
+    expect(formatMs(86_400_000)).toBe('1d')
+  })
 })
 
 describe('getWindowStart', () => {
