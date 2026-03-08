@@ -6,6 +6,7 @@ import type {
 } from '../core/types.js'
 import { resolveConfig, checkLimit } from '../core/rate-limiter.js'
 import { extractIPFromHeaders, ipMatches } from '../utils/ip.js'
+import { cachedLookupCountry } from '../utils/geo.js'
 import { extractPathname, findMatchingRoute } from '../utils/matcher.js'
 import { parseWindow } from '../utils/time.js'
 import { buildRateLimitHeaders } from '../utils/headers.js'
@@ -59,6 +60,22 @@ async function handleRequest(
     return
   }
 
+  // geo allowlist: if configured and IP not in allowed countries, block
+  if (config.allowlistGeo.length > 0) {
+    const country = cachedLookupCountry(ip)
+    if (!country || !config.allowlistGeo.includes(country)) {
+      config.onBlock?.(ip, {
+        reason: 'blocklist',
+        key: ip,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      })
+      res.status(403).json({ error: 'Forbidden', message: 'Request blocked' })
+      return
+    }
+  }
+
   // blocklist
   if (config.blocklist.length > 0 && ipMatches(ip, config.blocklist)) {
     config.onBlock?.(ip, {
@@ -70,6 +87,22 @@ async function handleRequest(
     })
     res.status(403).json({ error: 'Forbidden', message: 'Request blocked' })
     return
+  }
+
+  // geo blocklist
+  if (config.blocklistGeo.length > 0) {
+    const country = cachedLookupCountry(ip)
+    if (country && config.blocklistGeo.includes(country)) {
+      config.onBlock?.(ip, {
+        reason: 'blocklist',
+        key: ip,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      })
+      res.status(403).json({ error: 'Forbidden', message: 'Request blocked' })
+      return
+    }
   }
 
   // per-route config

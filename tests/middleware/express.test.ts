@@ -130,4 +130,45 @@ describe('express middleware', () => {
     expect(res.statusCode).toBe(403)
     expect(next).not.toHaveBeenCalled()
   })
+
+  it('geo allowlist lets allowed country through and blocks others', async () => {
+    const mw = createExpressMiddleware({
+      limit: 100,
+      window: '1m',
+      store,
+      allowlistGeo: ['US'],
+    })
+    // US IP should pass
+    const next = vi.fn()
+    await new Promise<void>((resolve) => {
+      mw(mockReq({ headers: { 'x-forwarded-for': '8.8.8.8' } }), mockRes(), () => {
+        next()
+        resolve()
+      })
+    })
+    expect(next).toHaveBeenCalled()
+
+    // non-US IP should be blocked
+    const res = mockRes()
+    await new Promise<void>((resolve) => {
+      mw(mockReq({ headers: { 'x-forwarded-for': '5.255.255.55' } }), res, () => resolve())
+      setTimeout(resolve, 20)
+    })
+    expect(res.statusCode).toBe(403)
+  })
+
+  it('geo blocklist blocks that country', async () => {
+    const mw = createExpressMiddleware({
+      limit: 100,
+      window: '1m',
+      store,
+      blocklistGeo: ['US'],
+    })
+    const res = mockRes()
+    await new Promise<void>((resolve) => {
+      mw(mockReq({ headers: { 'x-forwarded-for': '8.8.8.8' } }), res, () => resolve())
+      setTimeout(resolve, 20)
+    })
+    expect(res.statusCode).toBe(403)
+  })
 })

@@ -11,6 +11,7 @@ import { fixedWindowCheck } from './fixed-window.js'
 import { tokenBucketCheck } from './token-bucket.js'
 import { MemoryStore } from '../stores/memory.js'
 import { extractIP, ipMatches } from '../utils/ip.js'
+import { cachedLookupCountry } from '../utils/geo.js'
 import { parseWindow } from '../utils/time.js'
 import { findMatchingRoute, extractPathname } from '../utils/matcher.js'
 import {
@@ -48,6 +49,8 @@ export function resolveConfig(config: Partial<ShieldConfig> = {}): ResolvedConfi
     onBlock: config.onBlock,
     allowlist: config.allowlist ?? [],
     blocklist: config.blocklist ?? [],
+    allowlistGeo: config.allowlistGeo ?? [],
+    blocklistGeo: config.blocklistGeo ?? [],
     algorithm: config.algorithm ?? DEFAULT_ALGORITHM,
     headers: config.headers ?? DEFAULT_HEADERS,
   }
@@ -132,6 +135,35 @@ export async function processRequest(
     }
   }
 
+    // geo allowlist: if configured, only these countries may proceed
+    if (config.allowlistGeo.length > 0) {
+      const country = cachedLookupCountry(key)
+      if (!country || !config.allowlistGeo.includes(country)) {
+        // treat as blocked by geo
+        const blockInfo: BlockInfo = {
+          reason: 'blocklist',
+          key,
+          limit: config.limit,
+          window: config.windowMs,
+          blocked: true,
+        }
+        config.onBlock?.(key, blockInfo)
+        return {
+          result: {
+            allowed: false,
+            limit: config.limit,
+            remaining: 0,
+            reset: Math.ceil((Date.now() + config.windowMs) / 1000),
+            retryAfter: Math.ceil(config.windowMs / 1000),
+            blocked: true,
+          },
+          skip: false,
+          blockInfo,
+          key,
+        }
+      }
+    }
+
   // blocklisted? hard block
   if (config.blocklist.length > 0 && ipMatches(key, config.blocklist)) {
     const blockInfo: BlockInfo = {
@@ -155,6 +187,34 @@ export async function processRequest(
       skip: false,
       blockInfo,
       key,
+    }
+  }
+
+  // geo blocklist
+  if (config.blocklistGeo.length > 0) {
+    const country = cachedLookupCountry(key)
+    if (country && config.blocklistGeo.includes(country)) {
+      const blockInfo: BlockInfo = {
+        reason: 'blocklist',
+        key,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      }
+      config.onBlock?.(key, blockInfo)
+      return {
+        result: {
+          allowed: false,
+          limit: config.limit,
+          remaining: 0,
+          reset: Math.ceil((Date.now() + config.windowMs) / 1000),
+          retryAfter: Math.ceil(config.windowMs / 1000),
+          blocked: true,
+        },
+        skip: false,
+        blockInfo,
+        key,
+      }
     }
   }
 

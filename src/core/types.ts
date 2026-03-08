@@ -16,6 +16,8 @@ export interface ShieldConfig {
   onBlock?: (key: string, info: BlockInfo) => void
   allowlist?: string[]
   blocklist?: string[]
+  allowlistGeo?: string[]
+  blocklistGeo?: string[]
   algorithm?: Algorithm
   headers?: boolean // attach ratelimit headers? default true
 }
@@ -49,6 +51,8 @@ export interface ResolvedConfig {
   onBlock?: (key: string, info: BlockInfo) => void
   allowlist: string[]
   blocklist: string[]
+  allowlistGeo: string[]
+  blocklistGeo: string[]
   algorithm: Algorithm
   headers: boolean
 }

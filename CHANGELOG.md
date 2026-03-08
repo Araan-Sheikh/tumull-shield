@@ -15,5 +15,12 @@ Initial release.
 - Per-route config with glob/pattern matching
 - Allowlist / blocklist
 - Custom key functions
+
+## [1.1.0] — 2026-02-27
+
+### Added
+
+- Geo‑blocking support (`allowlistGeo` / `blocklistGeo` configuration)
+	(identifies country via `geoip-lite`)
 - Standard `X-RateLimit-*` headers
 - TypeScript, ESM + CJS

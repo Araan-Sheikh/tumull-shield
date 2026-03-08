@@ -17,6 +17,10 @@ interface ShieldConfig {
   onBlock?: (key: string, info: BlockInfo) => void
   allowlist?: string[]
   blocklist?: string[]
+  /** Countries that are always allowed (ISO 2-letter codes) */
+  allowlistGeo?: string[]
+  /** Countries that are always blocked */
+  blocklistGeo?: string[]
   headers?: boolean // default: true
 }
 ```

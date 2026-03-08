@@ -2,10 +2,7 @@
 
 Rate limiting, bot detection, and brute force protection for Node.js apps. Works with Next.js, Express, Fastify, Hono, or plain `http`. No external dependencies in the core.
 
-[![npm](https://img.shields.io/npm/v/@tumull/shield)](https://npmjs.com/package/@tumull/shield)
-[![bundle](https://img.shields.io/bundlephobia/minzip/@tumull/shield)](https://bundlephobia.com/package/@tumull/shield)
-[![license](https://img.shields.io/npm/l/@tumull/shield)](./LICENSE)
-[![tests](https://github.com/Araan-Sheikh/tumull-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Araan-Sheikh/tumull-shield/actions)
+[![npm](https://img.shields.io/npm/v/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![downloads](https://img.shields.io/npm/dm/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![bundle](https://img.shields.io/bundlephobia/minzip/@tumull/shield)](https://bundlephobia.com/package/@tumull/shield) [![license](https://img.shields.io/npm/l/@tumull/shield)](./LICENSE) [![tests](https://github.com/Aaraan-Sheikh/tumull-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Aaraan-Sheikh/tumull-shield/actions) [![release](https://github.com/Aaraan-Sheikh/tumull-shield/releases/latest/download/badge.svg)](https://github.com/Aaraan-Sheikh/tumull-shield/releases/latest)
 
 ---
 
@@ -108,7 +105,10 @@ shield({
   store: 'memory', // default. also supports Redis, Upstash
   botDetection: true,
   blockBots: ['scrapy', 'curl'],
-  allowlist: ['127.0.0.1'],
+    allowlist: ['127.0.0.1'],
+    // country-level controls (ISO codes)
+    allowlistGeo: ['US', 'CA'],
+    blocklistGeo: ['RU'],
   blocklist: [],
   headers: true, // X-RateLimit-* headers
 

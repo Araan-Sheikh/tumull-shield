@@ -1,6 +1,7 @@
 import type { ShieldConfig } from '../core/types.js'
 import { resolveConfig, checkLimit } from '../core/rate-limiter.js'
 import { extractIPFromHeaders, ipMatches } from '../utils/ip.js'
+import { cachedLookupCountry } from '../utils/geo.js'
 import { extractPathname, findMatchingRoute } from '../utils/matcher.js'
 import { parseWindow } from '../utils/time.js'
 import { buildRateLimitHeaders } from '../utils/headers.js'
@@ -28,9 +29,26 @@ export function createNodeHandler(
       req.socket?.remoteAddress,
     )
     const pathname = extractPathname(req.url ?? '/')
-
+    // ip allowlist
     if (config.allowlist.length > 0 && ipMatches(ip, config.allowlist)) return false
 
+    // geo allowlist: if present, only these countries are allowed
+    if (config.allowlistGeo.length > 0) {
+      const country = cachedLookupCountry(ip)
+      if (!country || !config.allowlistGeo.includes(country)) {
+        config.onBlock?.(ip, {
+          reason: 'blocklist',
+          key: ip,
+          limit: config.limit,
+          window: config.windowMs,
+          blocked: true,
+        })
+        sendJson(res, 403, { error: 'Forbidden', message: 'Request blocked' })
+        return true
+      }
+    }
+
+    // ip blocklist
     if (config.blocklist.length > 0 && ipMatches(ip, config.blocklist)) {
       config.onBlock?.(ip, {
         reason: 'blocklist',
@@ -41,6 +59,22 @@ export function createNodeHandler(
       })
       sendJson(res, 403, { error: 'Forbidden', message: 'Request blocked' })
       return true
+    }
+
+    // geo blocklist
+    if (config.blocklistGeo.length > 0) {
+      const country = cachedLookupCountry(ip)
+      if (country && config.blocklistGeo.includes(country)) {
+        config.onBlock?.(ip, {
+          reason: 'blocklist',
+          key: ip,
+          limit: config.limit,
+          window: config.windowMs,
+          blocked: true,
+        })
+        sendJson(res, 403, { error: 'Forbidden', message: 'Request blocked' })
+        return true
+      }
     }
 
     let limit = config.limit

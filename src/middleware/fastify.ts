@@ -1,6 +1,7 @@
 import type { ShieldConfig, FastifyInstance, FastifyRequest, FastifyReply } from '../core/types.js'
 import { resolveConfig, checkLimit } from '../core/rate-limiter.js'
 import { extractIPFromHeaders, ipMatches } from '../utils/ip.js'
+import { cachedLookupCountry } from '../utils/geo.js'
 import { extractPathname, findMatchingRoute } from '../utils/matcher.js'
 import { parseWindow } from '../utils/time.js'
 import { buildRateLimitHeaders } from '../utils/headers.js'
@@ -57,6 +58,22 @@ async function handleFastifyRequest(
 
   if (config.allowlist.length > 0 && ipMatches(ip, config.allowlist)) return false
 
+  // geo allowlist
+  if (config.allowlistGeo.length > 0) {
+    const country = cachedLookupCountry(ip)
+    if (!country || !config.allowlistGeo.includes(country)) {
+      config.onBlock?.(ip, {
+        reason: 'blocklist',
+        key: ip,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      })
+      reply.code(403).send({ error: 'Forbidden', message: 'Request blocked' })
+      return true
+    }
+  }
+
   if (config.blocklist.length > 0 && ipMatches(ip, config.blocklist)) {
     config.onBlock?.(ip, {
       reason: 'blocklist',
@@ -67,6 +84,22 @@ async function handleFastifyRequest(
     })
     reply.code(403).send({ error: 'Forbidden', message: 'Request blocked' })
     return true
+  }
+
+  // geo blocklist
+  if (config.blocklistGeo.length > 0) {
+    const country = cachedLookupCountry(ip)
+    if (country && config.blocklistGeo.includes(country)) {
+      config.onBlock?.(ip, {
+        reason: 'blocklist',
+        key: ip,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      })
+      reply.code(403).send({ error: 'Forbidden', message: 'Request blocked' })
+      return true
+    }
   }
 
   let limit = config.limit
