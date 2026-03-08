@@ -1,6 +1,6 @@
 {
   "name": "@tumull/shield",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Drop-in API rate limiting & DDoS protection for Node.js/Next.js",
   "license": "MIT",
   "author": "TUMULL I.N.C.",
