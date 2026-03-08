@@ -21,6 +21,6 @@ Initial release.
 ### Added
 
 - Geo‑blocking support (`allowlistGeo` / `blocklistGeo` configuration)
-	(identifies country via `geoip-lite`)
+  (identifies country via `geoip-lite`)
 - Standard `X-RateLimit-*` headers
 - TypeScript, ESM + CJS

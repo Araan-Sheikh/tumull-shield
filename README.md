@@ -105,10 +105,10 @@ shield({
   store: 'memory', // default. also supports Redis, Upstash
   botDetection: true,
   blockBots: ['scrapy', 'curl'],
-    allowlist: ['127.0.0.1'],
-    // country-level controls (ISO codes)
-    allowlistGeo: ['US', 'CA'],
-    blocklistGeo: ['RU'],
+  allowlist: ['127.0.0.1'],
+  // country-level controls (ISO codes)
+  allowlistGeo: ['US', 'CA'],
+  blocklistGeo: ['RU'],
   blocklist: [],
   headers: true, // X-RateLimit-* headers
 

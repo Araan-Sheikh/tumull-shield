@@ -98,9 +98,8 @@
     "@upstash/redis": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "geoip-lite": "^1.4.2"
   }
-,
-"dependencies": {
-  "geoip-lite": "^1.4.2"
-}
 }

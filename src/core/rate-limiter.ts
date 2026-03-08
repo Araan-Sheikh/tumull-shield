@@ -135,34 +135,34 @@ export async function processRequest(
     }
   }
 
-    // geo allowlist: if configured, only these countries may proceed
-    if (config.allowlistGeo.length > 0) {
-      const country = cachedLookupCountry(key)
-      if (!country || !config.allowlistGeo.includes(country)) {
-        // treat as blocked by geo
-        const blockInfo: BlockInfo = {
-          reason: 'blocklist',
-          key,
+  // geo allowlist: if configured, only these countries may proceed
+  if (config.allowlistGeo.length > 0) {
+    const country = cachedLookupCountry(key)
+    if (!country || !config.allowlistGeo.includes(country)) {
+      // treat as blocked by geo
+      const blockInfo: BlockInfo = {
+        reason: 'blocklist',
+        key,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      }
+      config.onBlock?.(key, blockInfo)
+      return {
+        result: {
+          allowed: false,
           limit: config.limit,
-          window: config.windowMs,
+          remaining: 0,
+          reset: Math.ceil((Date.now() + config.windowMs) / 1000),
+          retryAfter: Math.ceil(config.windowMs / 1000),
           blocked: true,
-        }
-        config.onBlock?.(key, blockInfo)
-        return {
-          result: {
-            allowed: false,
-            limit: config.limit,
-            remaining: 0,
-            reset: Math.ceil((Date.now() + config.windowMs) / 1000),
-            retryAfter: Math.ceil(config.windowMs / 1000),
-            blocked: true,
-          },
-          skip: false,
-          blockInfo,
-          key,
-        }
+        },
+        skip: false,
+        blockInfo,
+        key,
       }
     }
+  }
 
   // blocklisted? hard block
   if (config.blocklist.length > 0 && ipMatches(key, config.blocklist)) {
