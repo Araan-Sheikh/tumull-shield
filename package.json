@@ -101,6 +101,6 @@
   }
 ,
 "dependencies": {
-  "geoip-lite": "^1.4.2"
+  "geoip-lite": "^2.0.0"
 }
 }
