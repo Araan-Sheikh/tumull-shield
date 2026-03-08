@@ -20,8 +20,8 @@ export function cachedLookupCountry(ip: string): string | null {
   cache.set(ip, country)
   // keep cache small
   if (cache.size > 1000) {
-      const firstKey = cache.keys().next().value as string | undefined
-      if (firstKey) cache.delete(firstKey)
+    const firstKey = cache.keys().next().value as string | undefined
+    if (firstKey) cache.delete(firstKey)
   }
   return country
 }
