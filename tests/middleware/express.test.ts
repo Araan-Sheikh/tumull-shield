@@ -171,4 +171,87 @@ describe('express middleware', () => {
     })
     expect(res.statusCode).toBe(403)
   })
+
+  it('applies route-level geo allowlist', async () => {
+    const mw = createExpressMiddleware({
+      limit: 100,
+      window: '1m',
+      store,
+      allowlistGeo: ['US'],
+      routes: {
+        '/api/private/*': { allowlistGeo: ['RU'] },
+      },
+    })
+
+    const next = vi.fn()
+    await new Promise<void>((resolve) => {
+      mw(
+        mockReq({
+          url: '/api/private/data',
+          path: '/api/private/data',
+          headers: { 'x-forwarded-for': '5.255.255.55' },
+        }),
+        mockRes(),
+        () => {
+          next()
+          resolve()
+        },
+      )
+    })
+
+    expect(next).toHaveBeenCalled()
+  })
+
+  it('applies route-level geo blocklist', async () => {
+    const mw = createExpressMiddleware({
+      limit: 100,
+      window: '1m',
+      store,
+      routes: {
+        '/api/private/*': { blocklistGeo: ['US'] },
+      },
+    })
+
+    const res = mockRes()
+    await new Promise<void>((resolve) => {
+      mw(
+        mockReq({
+          url: '/api/private/data',
+          path: '/api/private/data',
+          headers: { 'x-forwarded-for': '8.8.8.8' },
+        }),
+        res,
+        () => resolve(),
+      )
+      setTimeout(resolve, 20)
+    })
+
+    expect(res.statusCode).toBe(403)
+  })
+
+  it('blocks requests that match WAF rules', async () => {
+    const mw = createExpressMiddleware({
+      limit: 100,
+      window: '1m',
+      store,
+      wafEnabled: true,
+      wafRules: [{ target: 'path', value: '/admin', message: 'admin path blocked' }],
+    })
+
+    const res = mockRes()
+    await new Promise<void>((resolve) => {
+      mw(
+        mockReq({
+          url: '/admin/panel',
+          path: '/admin/panel',
+          headers: { 'x-forwarded-for': '1.2.3.4' },
+        }),
+        res,
+        () => resolve(),
+      )
+      setTimeout(resolve, 20)
+    })
+
+    expect(res.statusCode).toBe(403)
+  })
 })

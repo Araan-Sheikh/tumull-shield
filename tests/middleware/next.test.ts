@@ -111,4 +111,22 @@ describe('next.js middleware', () => {
       expect(res.status).toBe(200)
     }
   })
+
+  it('blocks requests that match WAF rules', async () => {
+    const mw = createNextMiddleware({
+      limit: 100,
+      window: '1m',
+      store,
+      wafEnabled: true,
+      wafRules: [{ target: 'query', operator: 'regex', value: 'union\\s*select', flags: 'i' }],
+    })
+
+    const res = await mw(
+      new Request('http://localhost/api/test?q=UNION%20SELECT%201', {
+        headers: { 'x-forwarded-for': '1.2.3.4' },
+      }),
+    )
+
+    expect(res.status).toBe(403)
+  })
 })

@@ -5,6 +5,7 @@ import { cachedLookupCountry } from '../utils/geo.js'
 import { extractPathname, findMatchingRoute } from '../utils/matcher.js'
 import { parseWindow } from '../utils/time.js'
 import { buildRateLimitHeaders } from '../utils/headers.js'
+import { evaluateWaf } from '../protection/waf.js'
 import { DEFAULT_RATE_LIMIT_RESPONSE } from '../constants.js'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
@@ -29,13 +30,32 @@ export function createNodeHandler(
       req.socket?.remoteAddress,
     )
     const pathname = extractPathname(req.url ?? '/')
+    const matched = findMatchingRoute(pathname, config.routes)
+    const matchedRoute = matched ? config.routes[matched] : undefined
+    const geoAllowlist = matchedRoute?.allowlistGeo ?? config.allowlistGeo
+    const geoBlocklist = matchedRoute?.blocklistGeo ?? config.blocklistGeo
     // ip allowlist
     if (config.allowlist.length > 0 && ipMatches(ip, config.allowlist)) return false
 
+    if (config.wafEnabled && config.wafRules.length > 0) {
+      const waf = evaluateWaf(toWebRequest(req), config.wafRules)
+      if (waf.blocked) {
+        config.onBlock?.(ip, {
+          reason: 'waf',
+          key: ip,
+          limit: config.limit,
+          window: config.windowMs,
+          blocked: true,
+        })
+        sendJson(res, 403, { error: 'Forbidden', message: waf.reason ?? 'Request blocked by WAF' })
+        return true
+      }
+    }
+
     // geo allowlist: if present, only these countries are allowed
-    if (config.allowlistGeo.length > 0) {
+    if (geoAllowlist.length > 0) {
       const country = cachedLookupCountry(ip)
-      if (!country || !config.allowlistGeo.includes(country)) {
+      if (!country || !geoAllowlist.includes(country)) {
         config.onBlock?.(ip, {
           reason: 'blocklist',
           key: ip,
@@ -62,9 +82,9 @@ export function createNodeHandler(
     }
 
     // geo blocklist
-    if (config.blocklistGeo.length > 0) {
+    if (geoBlocklist.length > 0) {
       const country = cachedLookupCountry(ip)
-      if (country && config.blocklistGeo.includes(country)) {
+      if (country && geoBlocklist.includes(country)) {
         config.onBlock?.(ip, {
           reason: 'blocklist',
           key: ip,
@@ -82,7 +102,6 @@ export function createNodeHandler(
     let key = ip
     let blockMs = config.blockMs
 
-    const matched = findMatchingRoute(pathname, config.routes)
     if (matched) {
       const rc = config.routes[matched]
       if (rc.skip) return false
@@ -122,6 +141,18 @@ export function createNodeHandler(
 
     return false
   }
+}
+
+function toWebRequest(req: IncomingMessage): Request {
+  const headers = new Headers()
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (!value) continue
+    headers.set(key, Array.isArray(value) ? value[0] : value)
+  }
+  return new Request(`http://localhost${req.url ?? '/'}`, {
+    method: req.method ?? 'GET',
+    headers,
+  })
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {

@@ -18,6 +18,8 @@ export interface ShieldConfig {
   blocklist?: string[]
   allowlistGeo?: string[]
   blocklistGeo?: string[]
+  wafEnabled?: boolean
+  wafRules?: WafRule[]
   algorithm?: Algorithm
   headers?: boolean // attach ratelimit headers? default true
 }
@@ -27,6 +29,8 @@ export interface RouteConfig {
   window?: string
   block?: string
   skip?: boolean // set true to bypass rate limiting entirely
+  allowlistGeo?: string[] // route-level country allowlist (ISO 2-letter)
+  blocklistGeo?: string[] // route-level country blocklist (ISO 2-letter)
   key?: (req: Request) => string | Promise<string>
   onFailure?: {
     statusCodes?: number[] // which status codes count as "failure" (default [401, 403])
@@ -53,6 +57,8 @@ export interface ResolvedConfig {
   blocklist: string[]
   allowlistGeo: string[]
   blocklistGeo: string[]
+  wafEnabled: boolean
+  wafRules: WafRule[]
   algorithm: Algorithm
   headers: boolean
 }
@@ -67,12 +73,26 @@ export interface RateLimitResult {
 }
 
 export interface BlockInfo {
-  reason: 'rate-limit' | 'brute-force' | 'bot' | 'blocklist'
+  reason: 'rate-limit' | 'brute-force' | 'bot' | 'blocklist' | 'waf'
   key: string
   limit: number
   window: number
   blocked: boolean
   blockedUntil?: number
+}
+
+export type WafRuleTarget = 'url' | 'path' | 'query' | 'user-agent' | 'header' | 'method'
+
+export type WafRuleOperator = 'includes' | 'equals' | 'regex'
+
+export interface WafRule {
+  id?: string
+  target: WafRuleTarget
+  value: string
+  operator?: WafRuleOperator
+  headerName?: string
+  flags?: string
+  message?: string
 }
 
 // anything that satisfies this can be a backing store

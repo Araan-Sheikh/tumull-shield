@@ -1,6 +1,7 @@
 import type { ShieldConfig } from '../core/types.js'
 import { resolveConfig, processRequest } from '../core/rate-limiter.js'
 import { detectBot } from '../protection/bot-detect.js'
+import { evaluateWaf } from '../protection/waf.js'
 import {
   buildRateLimitHeaders,
   createRateLimitResponse,
@@ -28,6 +29,21 @@ export function createNextMiddleware(
         }
         config.onBlock?.('bot', blockInfo)
         return createBlockedResponse(botResult.reason ?? 'Bot detected')
+      }
+    }
+
+    if (config.wafEnabled && config.wafRules.length > 0) {
+      const waf = evaluateWaf(request, config.wafRules)
+      if (waf.blocked) {
+        const blockInfo = {
+          reason: 'waf' as const,
+          key: 'waf',
+          limit: config.limit,
+          window: config.windowMs,
+          blocked: true,
+        }
+        config.onBlock?.('waf', blockInfo)
+        return createBlockedResponse(waf.reason ?? 'Request blocked by WAF')
       }
     }
 

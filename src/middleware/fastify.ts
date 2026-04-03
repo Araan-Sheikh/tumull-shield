@@ -6,6 +6,7 @@ import { extractPathname, findMatchingRoute } from '../utils/matcher.js'
 import { parseWindow } from '../utils/time.js'
 import { buildRateLimitHeaders } from '../utils/headers.js'
 import { detectBot } from '../protection/bot-detect.js'
+import { evaluateWaf } from '../protection/waf.js'
 import { DEFAULT_RATE_LIMIT_RESPONSE } from '../constants.js'
 
 // fastify plugin
@@ -35,6 +36,10 @@ async function handleFastifyRequest(
 ): Promise<boolean> {
   const ip = extractIPFromHeaders(request.headers, request.ip)
   const pathname = extractPathname(request.url)
+  const matched = findMatchingRoute(pathname, config.routes)
+  const matchedRoute = matched ? config.routes[matched] : undefined
+  const geoAllowlist = matchedRoute?.allowlistGeo ?? config.allowlistGeo
+  const geoBlocklist = matchedRoute?.blocklistGeo ?? config.blocklistGeo
 
   if (config.botDetection) {
     const mockReq = toWebRequest(request)
@@ -56,12 +61,27 @@ async function handleFastifyRequest(
     }
   }
 
+  if (config.wafEnabled && config.wafRules.length > 0) {
+    const waf = evaluateWaf(toWebRequest(request), config.wafRules)
+    if (waf.blocked) {
+      config.onBlock?.(ip, {
+        reason: 'waf',
+        key: ip,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      })
+      reply.code(403).send({ error: 'Forbidden', message: waf.reason ?? 'Request blocked by WAF' })
+      return true
+    }
+  }
+
   if (config.allowlist.length > 0 && ipMatches(ip, config.allowlist)) return false
 
   // geo allowlist
-  if (config.allowlistGeo.length > 0) {
+  if (geoAllowlist.length > 0) {
     const country = cachedLookupCountry(ip)
-    if (!country || !config.allowlistGeo.includes(country)) {
+    if (!country || !geoAllowlist.includes(country)) {
       config.onBlock?.(ip, {
         reason: 'blocklist',
         key: ip,
@@ -87,9 +107,9 @@ async function handleFastifyRequest(
   }
 
   // geo blocklist
-  if (config.blocklistGeo.length > 0) {
+  if (geoBlocklist.length > 0) {
     const country = cachedLookupCountry(ip)
-    if (country && config.blocklistGeo.includes(country)) {
+    if (country && geoBlocklist.includes(country)) {
       config.onBlock?.(ip, {
         reason: 'blocklist',
         key: ip,
@@ -107,7 +127,6 @@ async function handleFastifyRequest(
   let key = ip
   let blockMs = config.blockMs
 
-  const matched = findMatchingRoute(pathname, config.routes)
   if (matched) {
     const rc = config.routes[matched]
     if (rc.skip) return false

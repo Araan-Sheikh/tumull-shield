@@ -21,7 +21,28 @@ interface ShieldConfig {
   allowlistGeo?: string[]
   /** Countries that are always blocked */
   blocklistGeo?: string[]
+  wafEnabled?: boolean
+  wafRules?: WafRule[]
   headers?: boolean // default: true
+}
+
+interface WafRule {
+  id?: string
+  target: 'url' | 'path' | 'query' | 'user-agent' | 'header' | 'method'
+  value: string
+  operator?: 'includes' | 'equals' | 'regex'
+  headerName?: string // required when target = 'header'
+  flags?: string // regex flags, e.g. "i"
+  message?: string
+}
+
+interface RouteConfig {
+  limit?: number
+  window?: string
+  block?: string
+  skip?: boolean
+  allowlistGeo?: string[] // route-level country allowlist
+  blocklistGeo?: string[] // route-level country blocklist
 }
 ```
 
@@ -42,11 +63,18 @@ interface ShieldConfig {
 shield({
   limit: 100,
   window: '1m',
+  wafEnabled: true,
+  wafRules: [
+    { target: 'query', operator: 'regex', value: 'union\\s*select', flags: 'i' },
+    { target: 'path', value: '/admin' },
+  ],
   routes: {
     '/api/auth/login': { limit: 5, window: '5m', block: '30m' },
     '/api/public/*': { limit: 500, window: '1m' },
     '/api/webhook/*': { skip: true },
     '/api/auth/**': { limit: 20, window: '1m' },
+    '/api/private/*': { allowlistGeo: ['US', 'CA'] },
+    '/api/eu-only/*': { blocklistGeo: ['US'] },
   },
 })
 ```

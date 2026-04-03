@@ -11,6 +11,7 @@ import { extractPathname, findMatchingRoute } from '../utils/matcher.js'
 import { parseWindow } from '../utils/time.js'
 import { buildRateLimitHeaders } from '../utils/headers.js'
 import { detectBot } from '../protection/bot-detect.js'
+import { evaluateWaf } from '../protection/waf.js'
 import { DEFAULT_RATE_LIMIT_RESPONSE } from '../constants.js'
 
 // express/connect compatible middleware
@@ -32,6 +33,10 @@ async function handleRequest(
 ): Promise<void> {
   const ip = extractIPFromHeaders(req.headers, req.ip)
   const pathname = extractPathname(req.url ?? req.path)
+  const matched = findMatchingRoute(pathname, config.routes)
+  const matchedRoute = matched ? config.routes[matched] : undefined
+  const geoAllowlist = matchedRoute?.allowlistGeo ?? config.allowlistGeo
+  const geoBlocklist = matchedRoute?.blocklistGeo ?? config.blocklistGeo
 
   // bot check
   if (config.botDetection) {
@@ -54,6 +59,21 @@ async function handleRequest(
     }
   }
 
+  if (config.wafEnabled && config.wafRules.length > 0) {
+    const waf = evaluateWaf(toWebRequest(req), config.wafRules)
+    if (waf.blocked) {
+      config.onBlock?.(ip, {
+        reason: 'waf',
+        key: ip,
+        limit: config.limit,
+        window: config.windowMs,
+        blocked: true,
+      })
+      res.status(403).json({ error: 'Forbidden', message: waf.reason ?? 'Request blocked by WAF' })
+      return
+    }
+  }
+
   // allowlist bypass
   if (config.allowlist.length > 0 && ipMatches(ip, config.allowlist)) {
     next()
@@ -61,9 +81,9 @@ async function handleRequest(
   }
 
   // geo allowlist: if configured and IP not in allowed countries, block
-  if (config.allowlistGeo.length > 0) {
+  if (geoAllowlist.length > 0) {
     const country = cachedLookupCountry(ip)
-    if (!country || !config.allowlistGeo.includes(country)) {
+    if (!country || !geoAllowlist.includes(country)) {
       config.onBlock?.(ip, {
         reason: 'blocklist',
         key: ip,
@@ -90,9 +110,9 @@ async function handleRequest(
   }
 
   // geo blocklist
-  if (config.blocklistGeo.length > 0) {
+  if (geoBlocklist.length > 0) {
     const country = cachedLookupCountry(ip)
-    if (country && config.blocklistGeo.includes(country)) {
+    if (country && geoBlocklist.includes(country)) {
       config.onBlock?.(ip, {
         reason: 'blocklist',
         key: ip,
@@ -111,7 +131,6 @@ async function handleRequest(
   let key = ip
   let blockMs = config.blockMs
 
-  const matched = findMatchingRoute(pathname, config.routes)
   if (matched) {
     const rc = config.routes[matched]
     if (rc.skip) {

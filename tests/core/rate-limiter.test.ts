@@ -162,4 +162,40 @@ describe('processRequest', () => {
     const { skip } = await processRequest({ request: req, config })
     expect(skip).toBe(true)
   })
+
+  it('supports route-level geo allowlist override', async () => {
+    const config = resolveConfig({
+      limit: 10,
+      store,
+      allowlistGeo: ['US'],
+      routes: {
+        '/api/private/*': { allowlistGeo: ['RU'] },
+      },
+    })
+
+    const ruPrivateReq = new Request('http://localhost/api/private/data', {
+      headers: { 'x-forwarded-for': '5.255.255.55' },
+    })
+
+    const { result } = await processRequest({ request: ruPrivateReq, config })
+    expect(result.allowed).toBe(true)
+  })
+
+  it('supports route-level geo blocklist override', async () => {
+    const config = resolveConfig({
+      limit: 10,
+      store,
+      routes: {
+        '/api/private/*': { blocklistGeo: ['US'] },
+      },
+    })
+
+    const usPrivateReq = new Request('http://localhost/api/private/data', {
+      headers: { 'x-forwarded-for': '8.8.8.8' },
+    })
+
+    const { result, blockInfo } = await processRequest({ request: usPrivateReq, config })
+    expect(result.allowed).toBe(false)
+    expect(blockInfo?.reason).toBe('blocklist')
+  })
 })

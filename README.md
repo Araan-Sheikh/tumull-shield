@@ -2,7 +2,7 @@
 
 Rate limiting, bot detection, and brute force protection for Node.js apps. Works with Next.js, Express, Fastify, Hono, or plain `http`. No external dependencies in the core.
 
-[![npm](https://img.shields.io/npm/v/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![downloads](https://img.shields.io/npm/dm/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![bundle](https://img.shields.io/bundlephobia/minzip/@tumull/shield)](https://bundlephobia.com/package/@tumull/shield) [![license](https://img.shields.io/npm/l/@tumull/shield)](./LICENSE) [![tests](https://github.com/Aaraan-Sheikh/tumull-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Aaraan-Sheikh/tumull-shield/actions) [![release](https://github.com/Aaraan-Sheikh/tumull-shield/releases/latest/download/badge.svg)](https://github.com/Aaraan-Sheikh/tumull-shield/releases/latest)
+[![npm](https://img.shields.io/npm/v/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![downloads](https://img.shields.io/npm/dm/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![bundle](https://img.shields.io/bundlephobia/minzip/@tumull/shield)](https://bundlephobia.com/package/@tumull/shield) [![license](https://img.shields.io/npm/l/@tumull/shield)](./LICENSE) [![tests](https://github.com/Araan-Sheikh/tumull-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Araan-Sheikh/tumull-shield/actions) [![release](https://img.shields.io/github/v/release/Araan-Sheikh/tumull-shield)](https://github.com/Araan-Sheikh/tumull-shield/releases/latest)
 
 ---
 
@@ -96,6 +96,7 @@ shield({
   routes: {
     '/api/auth/login': { limit: 5, window: '5m', block: '30m' },
     '/api/public/*': { limit: 500, window: '1m' },
+    '/api/private/*': { allowlistGeo: ['US', 'CA'] },
     '/api/webhook/*': { skip: true },
   },
 
@@ -109,6 +110,11 @@ shield({
   // country-level controls (ISO codes)
   allowlistGeo: ['US', 'CA'],
   blocklistGeo: ['RU'],
+  wafEnabled: true,
+  wafRules: [
+    { target: 'query', operator: 'regex', value: 'union\\s*select', flags: 'i' },
+    { target: 'path', value: '/admin' },
+  ],
   blocklist: [],
   headers: true, // X-RateLimit-* headers
 

@@ -51,6 +51,8 @@ export function resolveConfig(config: Partial<ShieldConfig> = {}): ResolvedConfi
     blocklist: config.blocklist ?? [],
     allowlistGeo: config.allowlistGeo ?? [],
     blocklistGeo: config.blocklistGeo ?? [],
+    wafEnabled: config.wafEnabled ?? (config.wafRules?.length ?? 0) > 0,
+    wafRules: config.wafRules ?? [],
     algorithm: config.algorithm ?? DEFAULT_ALGORITHM,
     headers: config.headers ?? DEFAULT_HEADERS,
   }
@@ -118,6 +120,11 @@ export async function processRequest(
   const { request, config, pathname: pathOverride } = options
   const key = await config.key(request)
   const pathname = pathOverride ?? extractPathname(request.url)
+  const matchedPattern = findMatchingRoute(pathname, config.routes)
+  const matchedRoute = matchedPattern ? config.routes[matchedPattern] : undefined
+
+  const geoAllowlist = matchedRoute?.allowlistGeo ?? config.allowlistGeo
+  const geoBlocklist = matchedRoute?.blocklistGeo ?? config.blocklistGeo
 
   // allowlisted? let it through, no questions asked
   if (config.allowlist.length > 0 && ipMatches(key, config.allowlist)) {
@@ -136,9 +143,9 @@ export async function processRequest(
   }
 
   // geo allowlist: if configured, only these countries may proceed
-  if (config.allowlistGeo.length > 0) {
+  if (geoAllowlist.length > 0) {
     const country = cachedLookupCountry(key)
-    if (!country || !config.allowlistGeo.includes(country)) {
+    if (!country || !geoAllowlist.includes(country)) {
       // treat as blocked by geo
       const blockInfo: BlockInfo = {
         reason: 'blocklist',
@@ -191,9 +198,9 @@ export async function processRequest(
   }
 
   // geo blocklist
-  if (config.blocklistGeo.length > 0) {
+  if (geoBlocklist.length > 0) {
     const country = cachedLookupCountry(key)
-    if (country && config.blocklistGeo.includes(country)) {
+    if (country && geoBlocklist.includes(country)) {
       const blockInfo: BlockInfo = {
         reason: 'blocklist',
         key,
@@ -224,8 +231,6 @@ export async function processRequest(
   let routeAlgorithm = config.algorithm
   let routeKey = key
   let routeBlockMs = config.blockMs
-
-  const matchedPattern = findMatchingRoute(pathname, config.routes)
 
   if (matchedPattern) {
     const routeConfig: RouteConfig = config.routes[matchedPattern]

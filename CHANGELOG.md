@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.2.0] — 2026-04-03
+
+### Added
+
+- Introduced a lightweight WAF rules engine with configurable `wafEnabled` and `wafRules`.
+- WAF rules support targets: `url`, `path`, `query`, `user-agent`, `header`, and `method`.
+- WAF operators support `includes`, `equals`, and `regex` matching with optional regex flags.
+- Exported `evaluateWaf` and WAF-related types for standalone usage.
+
+### Changed
+
+- Integrated WAF checks into Next.js, Hono, Express, Fastify, and Node.js middleware adapters.
+- Block events now support `reason: 'waf'` in `BlockInfo` callbacks.
+
+### Added
+
+- Route-level geo controls: `allowlistGeo` and `blocklistGeo` can now be defined inside
+  `routes` patterns to apply country rules to specific endpoints (for example, private APIs
+  or region-scoped routes) instead of only globally.
+
+### Changed
+
+- Geo evaluation now resolves an effective geo policy per route pattern in core processing and
+  in framework adapters (Express, Fastify, and Node.js HTTP), so behavior is consistent across
+  all runtimes.
+
+### Fixed
+
+- Pinned `geoip-lite` to `1.4.2` to avoid Node.js engine warnings on Node 22 environments.
+- Corrected README badges to point to the canonical GitHub repo (`Araan-Sheikh/tumull-shield`).
+
+### Changed
+
+- Exported `lookupCountry` and `cachedLookupCountry` from the package entrypoint so geo helpers
+  are available via `@tumull/shield`, matching the documented API.
+
 ## 1.0.0 (2025-02-26)
 
 Initial release.

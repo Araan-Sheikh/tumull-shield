@@ -23,11 +23,14 @@ export { BruteForceDetector } from './protection/brute-force.js'
 export type { BruteForceConfig } from './protection/brute-force.js'
 export { detectBot, isKnownBot } from './protection/bot-detect.js'
 export type { BotDetectionResult, BotDetectionConfig } from './protection/bot-detect.js'
+export { evaluateWaf } from './protection/waf.js'
+export type { WafResult } from './protection/waf.js'
 export { generateFingerprint, createCompositeKey } from './protection/fingerprint.js'
 
 // utils
 export { parseWindow, formatMs, getWindowStart } from './utils/time.js'
 export { extractIP, extractIPFromHeaders, normalizeIP, ipMatches } from './utils/ip.js'
+export { lookupCountry, cachedLookupCountry } from './utils/geo.js'
 export { matchRoute, findMatchingRoute, extractPathname } from './utils/matcher.js'
 export {
   buildRateLimitHeaders,
@@ -47,4 +50,7 @@ export type {
   SlidingWindowData,
   TokenBucketState,
   Algorithm,
+  WafRule,
+  WafRuleTarget,
+  WafRuleOperator,
 } from './core/types.js'
