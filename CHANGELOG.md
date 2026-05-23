@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0] — 2026-05-23
+
+### Added
+
+- Added `shieldWs` / `createWebSocketLimiter` for dependency-free WebSocket rate limiting.
+- WebSocket limiting now supports separate connection and message limits, optional block
+  durations, custom stores, key prefixes, and all existing rate-limit algorithms.
+- Added boolean helpers (`shouldCloseConnection` and `shouldDropMessage`) for common WebSocket
+  close/drop flows.
+- Added `reason: 'websocket'` to `BlockInfo` callbacks.
+
+### Docs
+
+- Documented WebSocket usage in the getting started and configuration guides.
+
 ## [1.2.0] — 2026-04-03
 
 ### Added

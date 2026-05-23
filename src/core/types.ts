@@ -73,7 +73,7 @@ export interface RateLimitResult {
 }
 
 export interface BlockInfo {
-  reason: 'rate-limit' | 'brute-force' | 'bot' | 'blocklist' | 'waf'
+  reason: 'rate-limit' | 'brute-force' | 'bot' | 'blocklist' | 'waf' | 'websocket'
   key: string
   limit: number
   window: number

@@ -47,6 +47,27 @@ app.register(shieldFastify, { limit: 100, window: '1m' })
 app.listen({ port: 3000 })
 ```
 
+## WebSocket
+
+```ts
+import { shieldWs } from '@tumull/shield'
+
+const wsLimit = shieldWs({
+  connectionLimit: 20,
+  connectionWindow: '1m',
+  messageLimit: 10,
+  messageWindow: '1s',
+})
+
+if (await wsLimit.shouldCloseConnection(clientIp)) {
+  socket.close()
+}
+
+if (await wsLimit.shouldDropMessage(clientIp, socketId)) {
+  return
+}
+```
+
 ## What happens when someone hits the limit?
 
 They get a `429 Too Many Requests` with a `Retry-After` header and a JSON body:

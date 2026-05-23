@@ -25,6 +25,8 @@ export { detectBot, isKnownBot } from './protection/bot-detect.js'
 export type { BotDetectionResult, BotDetectionConfig } from './protection/bot-detect.js'
 export { evaluateWaf } from './protection/waf.js'
 export type { WafResult } from './protection/waf.js'
+export { createWebSocketLimiter, shieldWs } from './protection/websocket.js'
+export type { WebSocketLimiter, WebSocketLimiterConfig } from './protection/websocket.js'
 export { generateFingerprint, createCompositeKey } from './protection/fingerprint.js'
 
 // utils

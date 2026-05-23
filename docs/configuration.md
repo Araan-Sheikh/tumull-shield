@@ -121,3 +121,32 @@ shield({
     }),
 })
 ```
+
+## WebSocket limiting
+
+Use `shieldWs` when you need to rate limit WebSocket connections or messages without adding
+a framework adapter:
+
+```ts
+import { shieldWs } from '@tumull/shield'
+
+const wsLimit = shieldWs({
+  connectionLimit: 20,
+  connectionWindow: '1m',
+  messageLimit: 10,
+  messageWindow: '1s',
+})
+
+server.on('connection', async (socket, req) => {
+  const key = req.socket.remoteAddress ?? 'unknown'
+  if (await wsLimit.shouldCloseConnection(key)) {
+    socket.close()
+    return
+  }
+
+  socket.on('message', async () => {
+    if (await wsLimit.shouldDropMessage(key, socket.id)) return
+    // handle message
+  })
+})
+```

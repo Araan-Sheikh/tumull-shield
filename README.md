@@ -1,6 +1,6 @@
 # @tumull/shield
 
-Rate limiting, bot detection, and brute force protection for Node.js apps. Works with Next.js, Express, Fastify, Hono, or plain `http`. No external dependencies in the core.
+Rate limiting, bot detection, brute force protection, and WebSocket throttling for Node.js apps. Works with Next.js, Express, Fastify, Hono, plain `http`, or WebSocket servers. No external dependencies in the core.
 
 [![npm](https://img.shields.io/npm/v/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![downloads](https://img.shields.io/npm/dm/@tumull/shield)](https://npmjs.com/package/@tumull/shield) [![bundle](https://img.shields.io/bundlephobia/minzip/@tumull/shield)](https://bundlephobia.com/package/@tumull/shield) [![license](https://img.shields.io/npm/l/@tumull/shield)](./LICENSE) [![tests](https://github.com/Araan-Sheikh/tumull-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Araan-Sheikh/tumull-shield/actions) [![release](https://img.shields.io/github/v/release/Araan-Sheikh/tumull-shield)](https://github.com/Araan-Sheikh/tumull-shield/releases/latest)
 
@@ -81,6 +81,33 @@ http
     res.end('ok')
   })
   .listen(3000)
+```
+
+### WebSocket
+
+```ts
+import { shieldWs } from '@tumull/shield'
+
+const wsLimit = shieldWs({
+  connectionLimit: 20,
+  connectionWindow: '1m',
+  messageLimit: 10,
+  messageWindow: '1s',
+})
+
+server.on('connection', async (socket, req) => {
+  const key = req.socket.remoteAddress ?? 'unknown'
+
+  if (await wsLimit.shouldCloseConnection(key)) {
+    socket.close()
+    return
+  }
+
+  socket.on('message', async () => {
+    if (await wsLimit.shouldDropMessage(key, socket.id)) return
+    // handle message
+  })
+})
 ```
 
 ## Config
@@ -190,6 +217,7 @@ When blocked → `429 Too Many Requests` with `Retry-After` header.
 | Sliding window     | ✅     | ❌                 | ✅                 | ✅       |
 | Bot detection      | ✅     | ❌                 | ❌                 | ✅       |
 | Brute force        | ✅     | ❌                 | ❌                 | ✅       |
+| WebSocket limits   | ✅     | ❌                 | ❌                 | ❌       |
 | Per-route config   | ✅     | manual             | ❌                 | ✅       |
 | Free               | ✅     | ✅                 | freemium           | freemium |
 
